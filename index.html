@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification</title>
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        img {
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Image for Classification</h2>
+        <input type="file" id="uploadImage" accept=".jpg, .jpeg, .png" onchange="previewImage(event)">
+        <br><br>
+        <img id="preview" src="#" alt="Uploaded Image">
+        <br><br>
+        <button onclick="classifyImage()">Classify Image</button>
+        <br><br>
+        <div id="result" style="display:none;">
+            <h3>Prediction:</h3>
+            <p id="prediction"></p>
+        </div>
+    </div>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function classifyImage() {
+            var input = document.getElementById('uploadImage');
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('image', file);
+
+            fetch('/classify', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('prediction').innerText = `Real Percentage: ${data.real_percent.toFixed(2)}%, Fake Percentage: ${data.fake_percent.toFixed(2)}%`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
